@@ -23,16 +23,20 @@ int main()
 {
 	/******************************************************************/
 	int i = 0;
-	int randChecker = 0;
+	bool randChecker = 0;
 	int randomNumber = -1;
+	int check = 0;
 	int unique = 0;
 	int listLength = 0;
+	int breaker = false;
+	int indexes[50] = { 0 };
 	std::ifstream inData;
 	std::ifstream passWords;
 	std::ofstream fullAdress;
 	std::string firstName;
 	std::string	lastName;
 	std::string word;
+	srand(time(NULL));
 	/*******************************************************************/
 	//opens the provided data files
 	inData.open("names.txt");
@@ -41,13 +45,44 @@ int main()
 	inData >> firstName >> lastName;
 	//stores the first password
 	passWords >> word;
+	
+	//Initializes the index array to -1
+	for (int f = 0; f < 50; f++)
+	{
+		indexes[f] = -1;
+	}
+
+	//Assigns random numbers to the index array
+	for (int h = 0; h < 50; h++)
+	{
+		//sets the checking variable to false
+		breaker = false;
+		//loops until a number that has not already been assigned is generated
+		while (!breaker)
+			{
+				randomNumber = rand() % 50;
+				breaker = true;
+				//loops through all assigned indexes and prevents matching indexes to pass
+				for (int g = 0; g < h+1; g++)
+				{
+					if (randomNumber == indexes[g])
+					{
+						breaker = false;
+					}
+				}
+
+			}
+		indexes[h] = randomNumber;
+		std::cout << indexes[h] << std::endl;
+	}
+
 	//runs the loop until both files have stored all their info in the two starting arrays
 	while (!inData.eof() && !passWords.eof())
 	{
 		//saves an email adress given the guidelines provided in the assignment
-		adress[i] = firstName.substr(0, 1) + lastName.substr(0, 7) + "@company.com";
+		employees[i].emailAdress = firstName.substr(0, 1) + lastName.substr(0, 7) + "@company.com";
 		//stores a password in the array of possible passwords
-		pWords[i] = word;
+		employees[i].passW = word;
 		//starts the next line of both files
 		inData >> firstName >> lastName;
 		passWords >> word;
@@ -59,46 +94,15 @@ int main()
 	passWords.close();
 	i = 0;
 
-	//runs a loop that checks each password against the list of already randomly assigned passwords
-	//if one has already been assigned it will iterate a variable that breaks the loop so it can draw another 
-	//random number and start over.  Only a unique password will iterate through the loop completely.
-	for (int j = 0; j < 50; j++)
-	{
-		std::cout << j << std::endl;
-		randChecker = 0;
-		while (unique == 0)								//COMMENTS: unique = 0 is incorrect as you are checking if unique has been set to 0
-		{
-			randomNumber = rand() % 49;
-			if (listLength > 0)
-			{		for (int k = 0; k < 50; k++)
-				{
-					if (pWords[randomNumber] == employees[k].passW)	//COMMENTS: employees[k].PassW is empty, can you explain your logic here?
-					{
-						randChecker++;
-						break;
-					}
-				}
-			}
-			if (randChecker == 0)
-			{
-				unique++;
-			}
-		}
-		//stores the email adress and the randomly assigned password to the index in the struct array.
-		employees[j].emailAdress = adress[j];
-		employees[j].passW = pWords[randomNumber];
-		unique = 0;
-		listLength++;
-		//COMMENTS: randChecker needs to be reset for each loop run
-	}
-
 	//opens the new file to save the data to
 	fullAdress.open("employeeEmails.txt");
 
 	//saves the data to the file line by line
 	while (i < 50)
 	{
-		fullAdress << employees[i].emailAdress + " " + employees[i].passW << std::endl;
+
+		//assigns the adress and the random password
+		fullAdress << employees[i].emailAdress + " " + employees[indexes[i]].passW << std::endl;
 		i++;
 	}
 	//closes the file
